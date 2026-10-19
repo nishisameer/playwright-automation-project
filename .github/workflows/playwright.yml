@@ -1,0 +1,154 @@
+name: Playwright Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 13 * * 1-5'   # nightly regression, weekdays 13:00 UTC (~7am Mountain)
+  workflow_dispatch:          # adds a "Run workflow" button in the Actions tab
+    inputs:
+      suite:
+        description: 'Which tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options: [all, smoke, ui, api]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ---------- Stage 1: static checks (fast feedback) ----------
+  lint:
+    name: Type check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  # ---------- Stage 2: run the tests ----------
+  test:
+    name: Tests (${{ matrix.project }})
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        project: [chromium, firefox, api]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Install browser
+        if: matrix.project != 'api'
+        run: npx playwright install --with-deps ${{ matrix.project }}
+
+      - name: Run tests
+        env:
+          CI: true
+          SUITE: ${{ github.event.inputs.suite || 'all' }}
+        run: |
+          GREP=""
+          if [ "$SUITE" = "smoke" ]; then GREP="--grep @smoke"; fi
+          if [ "$SUITE" = "ui" ]  && [ "${{ matrix.project }}" = "api" ]; then echo "Skipping API for ui suite"; exit 0; fi
+          if [ "$SUITE" = "api" ] && [ "${{ matrix.project }}" != "api" ]; then echo "Skipping UI for api suite"; exit 0; fi
+          npx playwright test --project=${{ matrix.project }} $GREP --reporter=blob,list
+
+      - name: Upload blob report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: blob-report-${{ matrix.project }}
+          path: blob-report
+          retention-days: 7
+
+      - name: Upload screenshots, videos & traces of failures
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.project }}
+          path: test-results
+          retention-days: 7
+
+  # ---------- Stage 3: merge results into one HTML report ----------
+  report:
+    name: Merge reports
+    needs: test
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Download blob reports
+        uses: actions/download-artifact@v4
+        with:
+          path: all-blob-reports
+          pattern: blob-report-*
+          merge-multiple: true
+
+      - name: Merge into HTML + JUnit
+        run: |
+          npx playwright merge-reports --reporter=html ./all-blob-reports
+          PLAYWRIGHT_JUNIT_OUTPUT_NAME=junit.xml npx playwright merge-reports --reporter=junit ./all-blob-reports
+
+      - name: Test summary on the run page
+        if: always()
+        run: |
+          node -e '
+            const x = require("fs").readFileSync("junit.xml","utf8");
+            const head = (x.match(/<testsuites[^>]*>/) || [""])[0];
+            const n = (k) => Number((head.match(new RegExp(k + "=\"(\\d+)\"")) || [0,0])[1]);
+            const t = n("tests"), f = n("failures") + n("errors"), s = n("skipped");
+            const line = `| ${t} | ${t-f-s} | ${f} | ${s} |`;
+            console.log(`## Test results\n\n| Total | Passed | Failed | Skipped |\n|---|---|---|---|\n${line}`);
+          ' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-html-report
+          path: playwright-report
+          retention-days: 14
+
+      - name: Upload report for GitHub Pages
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: playwright-report
+
+  # ---------- Stage 4: deploy the report as a website ----------
+  deploy-report:
+    name: Publish report to GitHub Pages
+    needs: report
+    if: github.ref == 'refs/heads/main' && !cancelled()
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
