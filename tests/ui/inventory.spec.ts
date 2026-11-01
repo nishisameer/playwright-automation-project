@@ -39,4 +39,25 @@ test.describe('Inventory & cart', () => {
     await cartPage.expectLoaded();
     await cartPage.expectItems(['Sauce Labs Onesie', 'Sauce Labs Fleece Jacket']);
   });
+
+  test('every product shows a name, price and add button', async ({ loggedInInventory }) => {
+    await expect(loggedInInventory.items).toHaveCount(6);
+
+    for (const card of await loggedInInventory.items.all()) {
+      await expect(card.locator('.inventory_item_name')).not.toBeEmpty();
+      await expect(card.locator('.inventory_item_price')).toHaveText(/^\$\d+\.\d{2}$/);
+      await expect(card.getByRole('button', { name: /add to cart/i })).toBeVisible();
+    }
+  });
+
+  test('adding every product puts all of them in the cart', async ({ loggedInInventory, cartPage }) => {
+    const names = await loggedInInventory.getNames();
+    for (const name of names) {
+      await loggedInInventory.addToCart(name);
+    }
+    await expect(loggedInInventory.cartBadge).toHaveText(String(names.length));
+
+    await loggedInInventory.openCart();
+    await cartPage.expectItems(names);
+  });
 });
