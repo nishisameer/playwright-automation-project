@@ -7,6 +7,12 @@ test.describe('Inventory & cart', () => {
     expect(prices).toEqual([...prices].sort((a, b) => a - b));
   });
 
+  test('sort by price high to low', async ({ loggedInInventory }) => {
+    await loggedInInventory.sortBy('hilo');
+    const prices = await loggedInInventory.getPrices();
+    expect(prices).toEqual([...prices].sort((a, b) => b - a));
+  });
+
   test('sort by name Z to A', async ({ loggedInInventory }) => {
     await loggedInInventory.sortBy('za');
     const names = await loggedInInventory.getNames();
