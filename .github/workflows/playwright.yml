@@ -5,8 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  schedule:
-    - cron: '0 13 * * 1-5'   # nightly regression, weekdays 13:00 UTC (~7am Mountain)
+ # schedule:
+  #  - cron: '0 13 * * 1-5'   # nightly regression, weekdays 13:00 UTC (~7am Mountain)
   workflow_dispatch:          # adds a "Run workflow" button in the Actions tab
     inputs:
       suite:
