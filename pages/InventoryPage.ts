@@ -1,4 +1,5 @@
 import { type Locator, type Page, expect } from '@playwright/test';
+import { randomInt } from 'node:crypto';
 
 export type SortOption = 'az' | 'za' | 'lohi' | 'hilo';
 
@@ -34,6 +35,16 @@ export class InventoryPage {
     await card.getByRole('button', { name: /add to cart/i }).click();
   }
 
+   /** Adds a random product that isn't in the cart yet and returns its name. */
+  async addRandomToCart(): Promise<string> {
+    const addButton = this.page.getByRole('button', { name: /add to cart/i });
+    const available = this.items.filter({ has: addButton });
+    const card = available.nth(randomInt(await available.count()));
+    const name = await card.locator('.inventory_item_name').innerText();
+    await card.getByRole('button', { name: /add to cart/i }).click();
+    return name;
+  }
+  
   async removeFromCart(productName: string) {
     const card = this.items.filter({ hasText: productName });
     await card.getByRole('button', { name: /remove/i }).click();

@@ -31,6 +31,18 @@ test.describe('Inventory & cart', () => {
     await expect(loggedInInventory.cartBadge).toBeHidden();
   });
 
+    test('adding and removing random items updates the cart badge @smoke', async ({ loggedInInventory }) => {
+    const firstItem = await loggedInInventory.addRandomToCart();
+    const secondItem = await loggedInInventory.addRandomToCart();
+    await expect(loggedInInventory.cartBadge).toHaveText('2');
+
+    await loggedInInventory.removeFromCart(firstItem);
+    await expect(loggedInInventory.cartBadge).toHaveText('1');
+
+    await loggedInInventory.removeFromCart(secondItem);
+    await expect(loggedInInventory.cartBadge).toBeHidden();
+  });
+
   test('cart keeps the items that were added', async ({ loggedInInventory, cartPage }) => {
     await loggedInInventory.addToCart('Sauce Labs Onesie');
     await loggedInInventory.addToCart('Sauce Labs Fleece Jacket');
