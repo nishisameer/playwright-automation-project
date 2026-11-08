@@ -10,14 +10,16 @@ CI/CD pipeline on GitHub Actions.
 | UI tests (`tests/ui`) | Login, sorting, cart and full checkout on [saucedemo.com](https://www.saucedemo.com), in Chrome and Firefox |
 | API tests (`tests/api`) | Full CRUD (create, read, update, delete) + auth token + negative test on [restful-booker](https://restful-booker.herokuapp.com) |
 | Page Object Model (`pages/`) | Locators and actions live in one place per page; tests stay readable |
+| Component tests (`src/components`) | Vitest + Testing Library tests for two small React components: a cart badge and a loading / error / empty status message |
+| Network mocking (`tests/ui/network-mocking.spec.ts`) | `page.route()` fakes slow, failed and empty API responses, and blocks images |
 | Fixtures (`fixtures/`) | Tests ask for `loggedInInventory` and get a logged-in page automatically |
 | Test data (`test-data/`) | Users and customer data kept out of the tests |
 | Tags | `@smoke` tests run as a quick subset |
 | Data-driven tests | One test definition, several input rows (`login.spec.ts`) |
 | Reports | HTML report, JUnit XML, screenshots + video + trace on failure |
-| CI/CD (`.github/workflows/playwright.yml`) | Type check → tests in parallel (chromium / firefox / api) → merged report → report published as a website |
+| CI/CD (`.github/workflows/playwright.yml`) | Type check → Vitest component tests → Playwright tests in parallel (chromium / firefox / api) → merged report → report published as a website |
 
-28 tests in total.
+47 tests in total: 35 Playwright tests (UI + API) and 12 Vitest component tests.
 
 ---
 
@@ -49,13 +51,15 @@ Unzip the project, open the folder in VS Code, and open the terminal inside VS C
 ```bash
 npm install                      # downloads Playwright + TypeScript
 npx playwright install           # downloads Chrome, Firefox, WebKit
-npm test                         # runs all 28 tests
+npm test                         # runs the Playwright tests
+npm run test:unit                # runs the Vitest component tests (a few seconds)
 npm run report                   # opens the HTML report in your browser
 ```
 
 Other useful commands:
 
 ```bash
+npm run test:unit:watch # Vitest re-runs tests as you edit
 npm run test:smoke      # only @smoke tests
 npm run test:api        # only API tests
 npm run test:headed     # watch the browser click through the tests
@@ -103,9 +107,9 @@ give it "Contents: Read and write" on this repo, and paste it when asked for a p
 Open the **Actions** tab in your repo. Every push to `main` triggers this pipeline:
 
 ```
-Type check ──► Tests (chromium) ─┐
-           ├─► Tests (firefox)  ─┼─► Merge reports ──► Publish report to GitHub Pages
-           └─► Tests (api)      ─┘
+Type check ──► Component tests ──► Tests (chromium) ─┐
+               (Vitest)       ├─► Tests (firefox)  ─┼─► Merge reports ──► Publish report to GitHub Pages
+                              └─► Tests (api)      ─┘
 ```
 
 - Click a run to see each job; click a job to see its log line by line.
@@ -115,7 +119,6 @@ Type check ──► Tests (chromium) ─┐
 
 It also runs:
 - on every **pull request** to `main`,
-- **nightly** on weekdays (scheduled regression),
 - **manually**: Actions → *Playwright Tests* → **Run workflow** → choose `all`, `smoke`, `ui` or `api`.
 
 ---
@@ -158,11 +161,15 @@ Do these in order. Each one teaches something you'll be asked about in interview
 │   ├── InventoryPage.ts
 │   ├── CartPage.ts
 │   └── CheckoutPage.ts
+├── src/components/                    # small React components + their Vitest tests
+│   ├── CartBadge.tsx / CartBadge.test.tsx
+│   └── ProductStatus.tsx / ProductStatus.test.tsx
 ├── test-data/users.ts                 # test users & customer data
 ├── tests/
-│   ├── ui/  login · inventory · checkout specs
+│   ├── ui/  login · inventory · checkout · network-mocking specs
 │   └── api/ booking.spec.ts
 ├── playwright.config.ts               # browsers, base URLs, retries, reporters
+├── vitest.config.ts                   # component test settings (jsdom, setup file)
 ├── tsconfig.json
 └── package.json                       # npm scripts
 ```
