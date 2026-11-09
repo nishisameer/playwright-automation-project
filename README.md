@@ -11,6 +11,7 @@ CI/CD pipeline on GitHub Actions.
 | API tests (`tests/api`) | Full CRUD (create, read, update, delete) + auth token + negative test on [restful-booker](https://restful-booker.herokuapp.com) |
 | Page Object Model (`pages/`) | Locators and actions live in one place per page; tests stay readable |
 | Component tests (`src/components`) | Vitest + Testing Library tests for two small React components: a cart badge and a loading / error / empty status message |
+| AI agent testing (`tests/ui/ai-agent.spec.ts`) | Testing an AI chat answer without exact text: key facts for any wording, slow answers, "not found" instead of made-up answers, failures, synthetic member IDs |
 | Network mocking (`tests/ui/network-mocking.spec.ts`) | `page.route()` fakes slow, failed and empty API responses, and blocks images |
 | Fixtures (`fixtures/`) | Tests ask for `loggedInInventory` and get a logged-in page automatically |
 | Test data (`test-data/`) | Users and customer data kept out of the tests |
@@ -19,7 +20,7 @@ CI/CD pipeline on GitHub Actions.
 | Reports | HTML report, JUnit XML, screenshots + video + trace on failure |
 | CI/CD (`.github/workflows/playwright.yml`) | Type check → Vitest component tests → Playwright tests in parallel (chromium / firefox / api) → merged report → report published as a website |
 
-47 tests in total: 35 Playwright tests (UI + API) and 12 Vitest component tests.
+55 tests in total: 43 Playwright tests (UI + API) and 12 Vitest component tests.
 
 ---
 
@@ -166,7 +167,7 @@ Do these in order. Each one teaches something you'll be asked about in interview
 │   └── ProductStatus.tsx / ProductStatus.test.tsx
 ├── test-data/users.ts                 # test users & customer data
 ├── tests/
-│   ├── ui/  login · inventory · checkout · network-mocking specs
+│   ├── ui/  login · inventory · checkout · network-mocking · ai-agent specs
 │   └── api/ booking.spec.ts
 ├── playwright.config.ts               # browsers, base URLs, retries, reporters
 ├── vitest.config.ts                   # component test settings (jsdom, setup file)
