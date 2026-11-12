@@ -1,6 +1,10 @@
-import { test, expect } from '../../fixtures/test-fixtures';
+import { test, expect } from '@fixtures/test-fixtures';
 import type { Page } from '@playwright/test';
-import { users } from '../../test-data/users';
+import { users } from '@test-data/users';
+
+// =============================================================================
+// Network mocking with page.route().
+// =============================================================================
 
 /**
  * page.route() intercepts requests the BROWSER makes and lets the test decide what happens:

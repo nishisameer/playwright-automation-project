@@ -1,3 +1,7 @@
+// =============================================================================
+// Page object for the product list ( /inventory.html ): sorting, adding and
+// removing items, the cart badge, and the side menu (logout).
+// =============================================================================
 import { type Locator, type Page, expect } from '@playwright/test';
 import { randomInt } from 'node:crypto';
 
@@ -13,6 +17,7 @@ export class InventoryPage {
   readonly cartBadge: Locator;
   readonly cartLink: Locator;
 
+  // --- Locators ---
   constructor(page: Page) {
     this.page = page;
     this.title = page.locator('.title');
@@ -24,18 +29,20 @@ export class InventoryPage {
     this.cartLink = page.locator('.shopping_cart_link');
   }
 
+  // --- Checks ---
   async expectLoaded() {
     await expect(this.page).toHaveURL(/inventory\.html/);
     await expect(this.title).toHaveText('Products');
   }
 
+  // --- Cart actions ---
   /** Adds a product by its visible name, e.g. "Sauce Labs Backpack". */
   async addToCart(productName: string) {
     const card = this.items.filter({ hasText: productName });
     await card.getByRole('button', { name: /add to cart/i }).click();
   }
 
-   /** Adds a random product that isn't in the cart yet and returns its name. */
+  /** Adds a random product that isn't in the cart yet and returns its name. */
   async addRandomToCart(): Promise<string> {
     const addButton = this.page.getByRole('button', { name: /add to cart/i });
     const available = this.items.filter({ has: addButton });
@@ -44,12 +51,13 @@ export class InventoryPage {
     await card.getByRole('button', { name: /add to cart/i }).click();
     return name;
   }
-  
+
   async removeFromCart(productName: string) {
     const card = this.items.filter({ hasText: productName });
     await card.getByRole('button', { name: /remove/i }).click();
   }
 
+  // --- Sorting and reading the product list ---
   async sortBy(option: SortOption) {
     await this.sortDropdown.selectOption(option);
   }
@@ -63,6 +71,7 @@ export class InventoryPage {
     return this.itemNames.allTextContents();
   }
 
+  // --- Navigation ---
   async openCart() {
     await this.cartLink.click();
   }

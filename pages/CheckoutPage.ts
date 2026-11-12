@@ -1,3 +1,9 @@
+// =============================================================================
+// Page object for the three checkout steps:
+//   step one  customer details form
+//   step two  order overview with the item total
+//   complete  "Thank you for your order"
+// =============================================================================
 import { type Locator, type Page, expect } from '@playwright/test';
 
 export class CheckoutPage {
@@ -11,6 +17,7 @@ export class CheckoutPage {
   readonly itemTotal: Locator;
   readonly completeHeader: Locator;
 
+  // --- Locators ---
   constructor(page: Page) {
     this.page = page;
     this.firstName = page.getByTestId('firstName');
@@ -23,6 +30,7 @@ export class CheckoutPage {
     this.completeHeader = page.locator('.complete-header');
   }
 
+  // --- Step one: customer details ---
   async fillInformation(info: { firstName: string; lastName: string; postalCode: string }) {
     await this.firstName.fill(info.firstName);
     await this.lastName.fill(info.lastName);
@@ -30,6 +38,7 @@ export class CheckoutPage {
     await this.continueButton.click();
   }
 
+  // --- Step two: overview ---
   /** Reads "Item total: $39.98" from the overview step and returns 39.98. */
   async getItemTotal(): Promise<number> {
     const text = (await this.itemTotal.textContent()) ?? '';
@@ -40,6 +49,7 @@ export class CheckoutPage {
     await this.finishButton.click();
   }
 
+  // --- Complete page ---
   async expectOrderComplete() {
     await expect(this.page).toHaveURL(/checkout-complete\.html/);
     await expect(this.completeHeader).toHaveText(/thank you for your order/i);

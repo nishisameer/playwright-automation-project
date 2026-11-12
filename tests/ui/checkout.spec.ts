@@ -1,7 +1,13 @@
-import { test, expect } from '../../fixtures/test-fixtures';
-import { customer } from '../../test-data/users';
+// =============================================================================
+// Checkout tests on saucedemo: a full purchase from cart to "Thank you",
+// and the form's required fields. Uses test.step() so the report shows
+// each stage of the purchase separately.
+// =============================================================================
+import { test, expect } from '@fixtures/test-fixtures';
+import { customer } from '@test-data/users';
 
 test.describe('Checkout (end-to-end)', () => {
+  // --- Happy path: buy two items and check the total ---
   test('user can buy two items and the total is correct @smoke', async ({
     loggedInInventory,
     cartPage,
@@ -36,6 +42,7 @@ test.describe('Checkout (end-to-end)', () => {
     });
   });
 
+  // --- Form validation ---
   test('checkout requires a first name', async ({ loggedInInventory, cartPage, checkoutPage }) => {
     await loggedInInventory.addToCart('Sauce Labs Backpack');
     await loggedInInventory.openCart();

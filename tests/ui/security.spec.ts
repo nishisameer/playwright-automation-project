@@ -1,13 +1,17 @@
-import { test, expect } from '../../fixtures/test-fixtures';
-import { users, PASSWORD } from '../../test-data/users';
+import { test, expect } from '@fixtures/test-fixtures';
+import { users, PASSWORD } from '@test-data/users';
 
-// Basic security checks a QA engineer can automate on the UI.
-// These are not penetration tests; they catch common, easy-to-miss mistakes.
+// =============================================================================
+// UI security checks on saucedemo. These are not penetration tests; they
+// catch common, easy-to-miss mistakes in access control and the login form.
 // Run only these with: npm run test:security
+// =============================================================================
 
+// --- Expected error messages ---
 const notLoggedInError = /you can only access .* when you are logged in/i;
 const badLoginError = /do not match any user/i;
 
+// --- Access control: who can open which page ---
 test.describe('Security: access control @security', () => {
   // Pages that should never open without logging in first.
   const protectedPages = ['/inventory.html', '/cart.html', '/checkout-step-one.html', '/checkout-complete.html'];
@@ -38,6 +42,7 @@ test.describe('Security: access control @security', () => {
   });
 });
 
+// --- Login form: what it reveals and what input it accepts ---
 test.describe('Security: login page @security', () => {
   test.beforeEach(async ({ loginPage }) => {
     await loginPage.goto();

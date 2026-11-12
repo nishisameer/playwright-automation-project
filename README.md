@@ -1,187 +1,93 @@
-# Playwright Automation Project — from zero to CI/CD
+# Playwright Automation Project
 
-A real, working test automation framework you can run on your machine and in a
-CI/CD pipeline on GitHub Actions.
+[![Playwright Tests](https://github.com/nishisameer/playwright-automation-project/actions/workflows/playwright.yml/badge.svg)](https://github.com/nishisameer/playwright-automation-project/actions/workflows/playwright.yml)
 
-**What's inside**
+End-to-end UI and API test automation with **Playwright** and **TypeScript**, plus **Vitest**
+component tests and an AI evaluation example, running in a **GitHub Actions** CI/CD pipeline that
+publishes the test report as a website.
 
-| Area | What it shows |
+- **UI under test:** [saucedemo.com](https://www.saucedemo.com) (Chrome and Firefox)
+- **API under test:** [restful-booker](https://restful-booker.herokuapp.com)
+- **Live report:** https://nishisameer.github.io/playwright-automation-project/
+
+New to the project? [docs/GETTING_STARTED.md](docs/GETTING_STARTED.md) walks through installing,
+running, and pushing it to GitHub step by step.
+
+## What it covers
+
+| Area | Where | What it shows |
+|---|---|---|
+| UI tests | `tests/ui` | Login, sorting, cart and full checkout, in two browsers |
+| API tests | `tests/api` | Full CRUD with an auth token, plus negative tests |
+| Security tests | `tests/ui/security.spec.ts`, `tests/api/security.spec.ts` | Access control, login form safety (SQL injection, XSS, user enumeration), API changes rejected without a valid token |
+| Network mocking | `tests/ui/network-mocking.spec.ts` | `page.route()` fakes slow, failed and empty API responses |
+| AI agent testing | `tests/examples/ai-agent.spec.ts` | Checking key facts instead of exact wording, slow answers, "not found" instead of made-up answers |
+| Page Object Model | `pages/` | Locators and actions in one place per page |
+| API client | `api/BookingClient.ts` | The API version of a page object: endpoints and token logic in one place |
+| Fixtures | `fixtures/` | Tests ask for `loggedInInventory` and get a logged-in page |
+| Config | `config/env.ts`, `.env.example` | URLs and credentials from environment variables or GitHub Secrets, never hard-coded in tests |
+| Component tests | `component-tests/` | Vitest + Testing Library for small React components |
+| AI evaluation | `ai-eval/` | Safety rules, a scoring rubric and an evaluation set with a release bar ([details](ai-eval/README.md)) |
+| CI/CD | `.github/workflows/playwright.yml` | Type check → Vitest → Playwright in parallel → merged report → GitHub Pages |
+
+## Quick start
+
+Requires Node.js 20 or 22.
+
+```bash
+npm install
+npx playwright install
+cp .env.example .env    # optional: change URLs or credentials
+npm test                # all Playwright tests
+```
+
+## Commands
+
+| Command | Runs |
 |---|---|
-| UI tests (`tests/ui`) | Login, sorting, cart and full checkout on [saucedemo.com](https://www.saucedemo.com), in Chrome and Firefox |
-| API tests (`tests/api`) | Full CRUD (create, read, update, delete) + auth token + negative test on [restful-booker](https://restful-booker.herokuapp.com) |
-| Page Object Model (`pages/`) | Locators and actions live in one place per page; tests stay readable |
-| Component tests (`src/components`) | Vitest + Testing Library tests for two small React components: a cart badge and a loading / error / empty status message |
-| AI agent testing (`tests/ui/ai-agent.spec.ts`) | Testing an AI chat answer without exact text: key facts for any wording, slow answers, "not found" instead of made-up answers, failures, synthetic member IDs |
-| Security tests (`tests/ui/security.spec.ts`, `tests/api/security.spec.ts`) | Pages blocked without login and after logout, same error for wrong user or password, SQL injection and XSS in the login form, API changes rejected without a valid token. Run with `npm run test:security` |
-| Network mocking (`tests/ui/network-mocking.spec.ts`) | `page.route()` fakes slow, failed and empty API responses, and blocks images |
-| Fixtures (`fixtures/`) | Tests ask for `loggedInInventory` and get a logged-in page automatically |
-| Test data (`test-data/`) | Users and customer data kept out of the tests |
-| Tags | `@smoke` tests run as a quick subset |
-| Data-driven tests | One test definition, several input rows (`login.spec.ts`) |
-| Reports | HTML report, JUnit XML, screenshots + video + trace on failure |
-| CI/CD (`.github/workflows/playwright.yml`) | Type check → Vitest component tests → Playwright tests in parallel (chromium / firefox / api) → merged report → report published as a website |
-
-55 tests in total: 43 Playwright tests (UI + API) and 12 Vitest component tests.
-
----
-
-## Part 1 — Install the tools (one time, ~15 min)
-
-1. **Node.js** (LTS, version 20 or 22): https://nodejs.org → download and install.
-2. **Git**: https://git-scm.com/downloads → install with the default options.
-3. **VS Code** (editor): https://code.visualstudio.com
-   Then in VS Code → Extensions → install **"Playwright Test for VSCode"** (by Microsoft).
-
-Check it worked — open a terminal (Windows: *PowerShell*, Mac: *Terminal*):
-
-```bash
-node -v     # should print v20.x or v22.x
-git --version
-```
-
-Tell Git who you are (once):
-
-```bash
-git config --global user.name "Your Name"
-git config --global user.email "you@example.com"
-```
-
-## Part 2 — Run the tests on your computer
-
-Unzip the project, open the folder in VS Code, and open the terminal inside VS Code (**Terminal → New Terminal**):
-
-```bash
-npm install                      # downloads Playwright + TypeScript
-npx playwright install           # downloads Chrome, Firefox, WebKit
-npm test                         # runs the Playwright tests
-npm run test:unit                # runs the Vitest component tests (a few seconds)
-npm run report                   # opens the HTML report in your browser
-```
-
-Other useful commands:
-
-```bash
-npm run test:unit:watch # Vitest re-runs tests as you edit
-npm run test:smoke      # only @smoke tests
-npm run test:api        # only API tests
-npm run test:headed     # watch the browser click through the tests
-npm run test:debug      # step through a test line by line
-npx playwright test --ui   # Playwright's visual test runner (great for learning)
-```
-
-## Part 3 — Create your GitHub account and repository
-
-1. Go to https://github.com/signup and create a free account.
-2. Once logged in, click the **+** in the top-right → **New repository**.
-3. Fill in:
-   - **Repository name:** `playwright-automation-project`
-   - **Visibility:** **Public** (needed for the free GitHub Pages report website; also good for your portfolio)
-   - Do **not** tick "Add a README", ".gitignore" or "license" — the project already has them.
-4. Click **Create repository**. Keep that page open; it shows your repo URL, like
-   `https://github.com/YOUR-USERNAME/playwright-automation-project.git`
-
-## Part 4 — Push the project to GitHub
-
-In the VS Code terminal, inside the project folder:
-
-```bash
-git init
-git add .
-git commit -m "Initial commit: Playwright framework + CI pipeline"
-git branch -M main
-git remote add origin https://github.com/YOUR-USERNAME/playwright-automation-project.git
-git push -u origin main
-```
-
-**Signing in:** the first push opens a browser window asking you to sign in to GitHub — approve it.
-(GitHub no longer accepts your account password in the terminal. If no window appears, create a
-*Personal access token* at GitHub → Settings → Developer settings → Personal access tokens → Fine-grained,
-give it "Contents: Read and write" on this repo, and paste it when asked for a password.)
-
-## Part 5 — Turn on the report website (one time)
-
-1. In your repo on GitHub: **Settings → Pages**.
-2. Under **Build and deployment → Source**, choose **GitHub Actions**.
-3. Go to the **Actions** tab → click the latest run → **Re-run all jobs** (the first run's publish step fails if Pages wasn't on yet — that's expected).
-
-## Part 6 — Watch the pipeline run
-
-Open the **Actions** tab in your repo. Every push to `main` triggers this pipeline:
-
-```
-Type check ──► Component tests ──► Tests (chromium) ─┐
-               (Vitest)       ├─► Tests (firefox)  ─┼─► Merge reports ──► Publish report to GitHub Pages
-                              └─► Tests (api)      ─┘
-```
-
-- Click a run to see each job; click a job to see its log line by line.
-- The run page shows a **Test results** summary table (total / passed / failed).
-- Scroll to **Artifacts** to download `playwright-html-report` (and, on failures, screenshots/videos/traces).
-- The **Publish** job shows a link like `https://YOUR-USERNAME.github.io/playwright-automation-project/` — that's your live test report.
-
-It also runs:
-- on every **pull request** to `main`,
-- **manually**: Actions → *Playwright Tests* → **Run workflow** → choose `all`, `smoke`, `ui` or `api`.
-
----
-
-## Part 7 — Exercises to build real confidence
-
-Do these in order. Each one teaches something you'll be asked about in interviews.
-
-1. **See a red pipeline.** In `tests/ui/login.spec.ts` change `toHaveCount(6)` to `toHaveCount(7)`.
-   Commit and push. Watch the build fail, download the `test-results-chromium` artifact, and open the
-   trace with `npx playwright show-trace path/to/trace.zip`. Then fix it and push again → green.
-2. **Work like a team (pull requests).**
-   ```bash
-   git checkout -b add-new-test
-   # write a new test, e.g. "Continue shopping returns to inventory"
-   git add . && git commit -m "Add continue shopping test"
-   git push -u origin add-new-test
-   ```
-   On GitHub click **Compare & pull request**. The pipeline runs on the PR; merge only when green.
-3. **Protect main.** Settings → Branches → Add rule for `main` → *Require status checks to pass* →
-   select the test jobs. Now nobody can merge broken tests.
-4. **Add a page object.** Create `pages/ProductDetailPage.ts` for the product detail page and a test
-   that opens an item and checks its name and price match the list.
-5. **Use a secret.** Add a repo secret `SAUCE_PASSWORD` (Settings → Secrets and variables → Actions),
-   then pass it in the workflow's *Run tests* step under `env:` as
-   `SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}`. `test-data/users.ts` already reads it.
-6. **Try `problem_user`.** Log in as `problem_user` and write tests that *find* its bugs
-   (wrong images, broken sorting). This is what real testing feels like.
-7. **Explain the pipeline out loud** — what each job does, why tests retry 2× on CI only, why
-   `fail-fast: false`, why reports are merged. If you can explain it, you own it.
+| `npm test` | All Playwright tests |
+| `npm run test:ui` | UI tests in Chrome and Firefox |
+| `npm run test:api` | API tests |
+| `npm run test:smoke` | Quick `@smoke` subset |
+| `npm run test:security` | `@security` tests (UI and API) |
+| `npm run test:examples` | Technique examples (AI agent) |
+| `npm run test:unit` | Vitest component tests and AI evaluation |
+| `npm run test:eval` | AI evaluation only |
+| `npm run test:headed` | Chrome with the browser visible |
+| `npm run test:debug` | Step through a test line by line |
+| `npm run report` | Open the last HTML report |
+| `npm run typecheck` | TypeScript check |
 
 ## Project structure
 
 ```
 .
-├── .github/workflows/playwright.yml   # CI/CD pipeline
-├── fixtures/test-fixtures.ts          # custom fixtures (page objects, logged-in state)
-├── pages/                             # Page Object Model
-│   ├── LoginPage.ts
-│   ├── InventoryPage.ts
-│   ├── CartPage.ts
-│   └── CheckoutPage.ts
-├── src/components/                    # small React components + their Vitest tests
-│   ├── CartBadge.tsx / CartBadge.test.tsx
-│   └── ProductStatus.tsx / ProductStatus.test.tsx
-├── test-data/users.ts                 # test users & customer data
+├── .github/workflows/playwright.yml   CI/CD pipeline
+├── api/                               API clients (BookingClient)
+├── config/env.ts                      URLs and credentials from environment variables
+├── fixtures/                          custom Playwright fixtures
+├── pages/                             page objects (Login, Inventory, Cart, Checkout)
+├── test-data/                         users and customer details
 ├── tests/
-│   ├── ui/  login · inventory · checkout · network-mocking · ai-agent specs
-│   └── api/ booking.spec.ts
-├── playwright.config.ts               # browsers, base URLs, retries, reporters
-├── vitest.config.ts                   # component test settings (jsdom, setup file)
-├── tsconfig.json
-└── package.json                       # npm scripts
+│   ├── ui/                            saucedemo: login, inventory, checkout, security, network mocking
+│   ├── api/                           restful-booker: booking CRUD, security
+│   └── examples/                      techniques on a fake page (AI agent answers)
+├── component-tests/                   Vitest + React Testing Library
+├── ai-eval/                           AI evaluation example (Vitest)
+├── docs/GETTING_STARTED.md            step-by-step setup guide
+├── .env.example                       template for local settings
+├── playwright.config.ts
+├── vitest.config.ts
+└── tsconfig.json                      includes short import paths (@pages, @api, ...)
 ```
 
-## Troubleshooting
+## Reports
 
-| Problem | Fix |
-|---|---|
-| `npx: command not found` | Node isn't installed or terminal was open before install — reopen it |
-| Tests time out locally | Check your internet; the test sites are public websites |
-| `git push` rejected / 403 | Sign-in issue — use the browser prompt or a personal access token (Part 4) |
-| Publish job fails | Turn on Pages with source **GitHub Actions** (Part 5), then re-run |
-| API tests fail occasionally | restful-booker is a shared free demo that sometimes resets; CI retries 2× |
+Every run produces an HTML report, JUnit XML, and screenshots, video and a trace for failed
+tests. In CI, the reports from all projects are merged into one, summarized on the run page,
+and published to GitHub Pages from `main`.
+
+## Test data
+
+All users, customers and members are synthetic. The credentials in `.env.example` are the
+public demo values that saucedemo and restful-booker publish.
