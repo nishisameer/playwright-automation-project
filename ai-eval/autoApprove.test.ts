@@ -21,6 +21,8 @@ describe('decide: AI may approve, but never deny on its own', () => {
   });
 
   it('sends procedures outside the auto-approve list to a human', () => {
-    expect(decide({ procedure: 'SURGERY', aiRecommendation: 'APPROVE', confidence: 0.99 })).toBe('HUMAN_REVIEW');
+    expect(decide({ procedure: 'SURGERY', aiRecommendation: 'APPROVE', confidence: 0.99 })).toBe(
+      'HUMAN_REVIEW',
+    );
   });
 });

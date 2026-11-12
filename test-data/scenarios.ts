@@ -27,17 +27,37 @@ export const cartScenarios = [
 
 // --- UI: checkout form, each missing field and the error it should show ---
 export const checkoutFormScenarios = [
-  { name: 'missing first name', customer: buildCustomer({ firstName: '' }), error: /first name is required/i },
+  {
+    name: 'missing first name',
+    customer: buildCustomer({ firstName: '' }),
+    error: /first name is required/i,
+  },
   { name: 'missing last name', customer: buildCustomer({ lastName: '' }), error: /last name is required/i },
-  { name: 'missing postal code', customer: buildCustomer({ postalCode: '' }), error: /postal code is required/i },
+  {
+    name: 'missing postal code',
+    customer: buildCustomer({ postalCode: '' }),
+    error: /postal code is required/i,
+  },
 ];
 
 // --- API: bookings that should be saved exactly as sent ---
 export const bookingScenarios = [
   { name: 'standard stay', booking: buildBooking() },
   { name: 'no deposit paid', booking: buildBooking({ depositpaid: false }) },
-  { name: 'one-night stay', booking: buildBooking({ bookingdates: { checkin: '2026-12-10', checkout: '2026-12-11' } }) },
-  { name: 'long stay, high price', booking: buildBooking({ totalprice: 4200, bookingdates: { checkin: '2026-12-01', checkout: '2027-01-15' } }) },
+  {
+    name: 'one-night stay',
+    booking: buildBooking({ bookingdates: { checkin: '2026-12-10', checkout: '2026-12-11' } }),
+  },
+  {
+    name: 'long stay, high price',
+    booking: buildBooking({
+      totalprice: 4200,
+      bookingdates: { checkin: '2026-12-01', checkout: '2027-01-15' },
+    }),
+  },
   { name: 'no extra needs', booking: buildBooking({ additionalneeds: undefined }) },
-  { name: 'name with accent and hyphen', booking: buildBooking({ firstname: 'José', lastname: "O'Neil-Smith" }) },
+  {
+    name: 'name with accent and hyphen',
+    booking: buildBooking({ firstname: 'José', lastname: "O'Neil-Smith" }),
+  },
 ];

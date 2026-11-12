@@ -40,7 +40,11 @@ test.describe('Security: authentication @security', () => {
 // --- Changing data: must be rejected without a valid token ---
 test.describe('Security: changing data needs a valid token @security', () => {
   test('update with a fake token is forbidden', async () => {
-    const res = await client.update(bookingId, { ...booking, totalprice: 1 }, BookingClient.tokenHeader('fake-token-123'));
+    const res = await client.update(
+      bookingId,
+      { ...booking, totalprice: 1 },
+      BookingClient.tokenHeader('fake-token-123'),
+    );
     expect(res.status()).toBe(403);
   });
 

@@ -69,7 +69,7 @@ test.describe('AI agent: prior authorization answers', () => {
   // The same correct facts, worded three different ways, like a real AI might answer.
   const correctAnswers = [
     'The prior authorization for member TEST-001 was approved on March 3.',
-    'Good news! Member TEST-001\'s request was Approved (decision date: Mar 3, 2026).',
+    "Good news! Member TEST-001's request was Approved (decision date: Mar 3, 2026).",
     'Status: APPROVED. Decided 3/3/2026 for TEST-001.',
   ];
 
@@ -81,16 +81,16 @@ test.describe('AI agent: prior authorization answers', () => {
       await ask(page, 'What is the prior authorization status for member TEST-001?');
 
       const answer = page.getByTestId('agent-response');
-      await expect(answer).toContainText(/approved/i);                          // key fact 1
-      await expect(answer).toContainText(/march 3|mar 3|3\/3/i);                // key fact 2
-      await expect(answer).toContainText('TEST-001');                           // the right member
-      await expect(answer).not.toContainText(/denied|pending/i);                // nothing contradicting
+      await expect(answer).toContainText(/approved/i); // key fact 1
+      await expect(answer).toContainText(/march 3|mar 3|3\/3/i); // key fact 2
+      await expect(answer).toContainText('TEST-001'); // the right member
+      await expect(answer).not.toContainText(/denied|pending/i); // nothing contradicting
     });
   }
 
   test('catches a wrong answer (wrong status)', async ({ page }) => {
     await page.route('**/api/agent', (route) =>
-      route.fulfill({ status: 200, json: { answer: 'Member TEST-001\'s request was denied on March 3.' } }),
+      route.fulfill({ status: 200, json: { answer: "Member TEST-001's request was denied on March 3." } }),
     );
     await openAssistant(page);
     await ask(page, 'What is the prior authorization status for member TEST-001?');
@@ -108,8 +108,8 @@ test.describe('AI agent: prior authorization answers', () => {
 
     await page.getByLabel('Ask a question').fill('Status for TEST-001?');
     await page.getByRole('button', { name: 'Send' }).click();
-    await expect(page.getByTestId('agent-typing')).toBeVisible();   // loading state shows
-    await expect(page.getByTestId('agent-typing')).toBeHidden();    // then disappears
+    await expect(page.getByTestId('agent-typing')).toBeVisible(); // loading state shows
+    await expect(page.getByTestId('agent-typing')).toBeHidden(); // then disappears
     await expect(page.getByTestId('agent-response')).toContainText(/approved/i);
   });
 
@@ -122,7 +122,7 @@ test.describe('AI agent: prior authorization answers', () => {
 
     const answer = page.getByTestId('agent-response');
     await expect(answer).toContainText(/could not find|couldn't find|no record|not found/i);
-    await expect(answer).not.toContainText(/approved|denied/i);    // no invented status
+    await expect(answer).not.toContainText(/approved|denied/i); // no invented status
   });
 
   test('shows a friendly message when the agent fails', async ({ page }) => {
@@ -138,7 +138,7 @@ test.describe('AI agent: prior authorization answers', () => {
   test('sends the question to the agent API', async ({ page }) => {
     let sentQuestion = '';
     await page.route('**/api/agent', async (route) => {
-      sentQuestion = route.request().postDataJSON().question;   // inspect what the page sent
+      sentQuestion = route.request().postDataJSON().question; // inspect what the page sent
       await route.fulfill({ status: 200, json: { answer: 'TEST-001: approved on March 3.' } });
     });
     await openAssistant(page);

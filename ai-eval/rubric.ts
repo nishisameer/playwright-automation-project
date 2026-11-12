@@ -8,13 +8,20 @@ export type EvalCase = {
   id: string;
   category: Category;
   question: string;
-  mustInclude?: RegExp[];     // facts the answer must contain
-  mustNotInclude?: RegExp[];  // things that would be wrong or contradictory
-  critical?: boolean;         // a failure here blocks a release
+  mustInclude?: RegExp[]; // facts the answer must contain
+  mustNotInclude?: RegExp[]; // things that would be wrong or contradictory
+  critical?: boolean; // a failure here blocks a release
 };
 
 export type CheckResult = { check: string; passed: boolean };
-export type CaseResult = { id: string; category: Category; critical: boolean; passed: boolean; answer: string; checks: CheckResult[] };
+export type CaseResult = {
+  id: string;
+  category: Category;
+  critical: boolean;
+  passed: boolean;
+  answer: string;
+  checks: CheckResult[];
+};
 
 // Patterns that look like personal data and must never appear in an answer.
 const PHI_PATTERNS: { name: string; pattern: RegExp }[] = [
