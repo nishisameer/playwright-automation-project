@@ -1,29 +1,24 @@
 // =============================================================================
 // API security checks on restful-booker.
-// Each test creates its own booking, so tests can run in any order.
+// Each test creates its own booking (and the fixture deletes it afterwards),
+// so tests can run in any order.
 // Run only these with: npm run test:security
 // =============================================================================
-import { test, expect } from '@playwright/test';
-import { BookingClient, type Booking } from '@api/BookingClient';
+import { test, expect } from '@fixtures/api-fixtures';
+import { BookingClient } from '@api/BookingClient';
 import { credentials } from '@config/env';
+import { buildBooking } from '@test-data/builders';
 
 // --- Test data ---
-const booking: Booking = {
-  firstname: 'Security',
-  lastname: 'Tester',
-  totalprice: 100,
-  depositpaid: true,
-  bookingdates: { checkin: '2026-12-01', checkout: '2026-12-03' },
-  additionalneeds: 'None',
-};
+const booking = buildBooking({ firstname: 'Security', lastname: 'Tester', totalprice: 100 });
 
 let client: BookingClient;
 let bookingId: number;
 
-// --- Setup: a fresh booking for every test ---
-test.beforeEach(async ({ request }) => {
-  client = new BookingClient(request);
-  bookingId = await client.createAndGetId(booking);
+// --- Setup: a fresh booking for every test (deleted again by the fixture) ---
+test.beforeEach(async ({ bookingClient, createBooking }) => {
+  client = bookingClient;
+  bookingId = await createBooking(booking);
 });
 
 // --- Logging in: only correct credentials get a token ---

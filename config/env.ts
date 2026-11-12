@@ -30,5 +30,10 @@ export const credentials = {
   apiPassword: process.env.API_PASSWORD || 'password123',
 };
 
+// --- Saved login (see tests/setup/auth.setup.ts) ---
+// The setup project logs in once per browser and saves the cookies here,
+// so UI tests can start already logged in instead of filling the login form.
+export const authStatePath = (browser: string) => `.auth/standard-user-${browser}.json`;
+
 // --- Are we running in CI (GitHub Actions sets CI=true)? ---
 export const isCI = !!process.env.CI;

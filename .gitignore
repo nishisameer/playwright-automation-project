@@ -6,3 +6,4 @@ playwright/.cache/
 .env
 .DS_Store
 .playwright-mcp/
+.auth/

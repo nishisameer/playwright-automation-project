@@ -19,7 +19,7 @@ type Pages = {
   inventoryPage: InventoryPage;
   cartPage: CartPage;
   checkoutPage: CheckoutPage;
-  /** An InventoryPage that is already logged in as standard_user. */
+  /** The product list, logged in as standard_user. */
   loggedInInventory: InventoryPage;
 };
 
@@ -30,12 +30,21 @@ export const test = base.extend<Pages>({
   cartPage: async ({ page }, use) => use(new CartPage(page)),
   checkoutPage: async ({ page }, use) => use(new CheckoutPage(page)),
 
-  // --- Logged-in state: log in first, then hand the test the product list ---
+  // --- Logged-in product list ---
+  // Usually the saved session (tests/setup/auth.setup.ts) means we're already logged in,
+  // so this just opens the page. If not (for example, a spec that resets the session),
+  // it falls back to logging in through the form, so the fixture always works.
   loggedInInventory: async ({ page }, use) => {
     const login = new LoginPage(page);
-    await login.goto();
-    await login.login(users.standard.username, users.standard.password);
     const inventory = new InventoryPage(page);
+
+    await page.goto('/inventory.html');
+    // Wait for whichever page shows up: the products, or the login form.
+    await inventory.title.or(login.loginButton).first().waitFor();
+
+    if (await login.loginButton.isVisible()) {
+      await login.login(users.standard.username, users.standard.password);
+    }
     await inventory.expectLoaded();
     await use(inventory);
   },

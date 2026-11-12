@@ -1,10 +1,11 @@
 // =============================================================================
 // Checkout tests on saucedemo: a full purchase from cart to "Thank you",
-// and the form's required fields. Uses test.step() so the report shows
-// each stage of the purchase separately.
+// and each required field of the form (scenarios in test-data/scenarios.ts).
+// Uses test.step() so the report shows each stage of the purchase separately.
 // =============================================================================
 import { test, expect } from '@fixtures/test-fixtures';
 import { customer } from '@test-data/users';
+import { checkoutFormScenarios, products } from '@test-data/scenarios';
 
 test.describe('Checkout (end-to-end)', () => {
   // --- Happy path: buy two items and check the total ---
@@ -42,13 +43,15 @@ test.describe('Checkout (end-to-end)', () => {
     });
   });
 
-  // --- Form validation ---
-  test('checkout requires a first name', async ({ loggedInInventory, cartPage, checkoutPage }) => {
-    await loggedInInventory.addToCart('Sauce Labs Backpack');
-    await loggedInInventory.openCart();
-    await cartPage.checkout();
+  // --- Form validation (data-driven: one test per entry in checkoutFormScenarios) ---
+  for (const scenario of checkoutFormScenarios) {
+    test(`checkout form: ${scenario.name}`, async ({ loggedInInventory, cartPage, checkoutPage }) => {
+      await loggedInInventory.addToCart(products.backpack);
+      await loggedInInventory.openCart();
+      await cartPage.checkout();
 
-    await checkoutPage.fillInformation({ ...customer, firstName: '' });
-    await expect(checkoutPage.errorMessage).toContainText(/first name is required/i);
-  });
+      await checkoutPage.fillInformation(scenario.customer);
+      await expect(checkoutPage.errorMessage).toContainText(scenario.error);
+    });
+  }
 });

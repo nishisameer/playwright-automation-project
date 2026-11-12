@@ -7,6 +7,9 @@ import { users, PASSWORD } from '@test-data/users';
 // Run only these with: npm run test:security
 // =============================================================================
 
+// --- These tests need a logged-OUT browser, so ignore the saved session ---
+test.use({ storageState: { cookies: [], origins: [] } });
+
 // --- Expected error messages ---
 const notLoggedInError = /you can only access .* when you are logged in/i;
 const badLoginError = /do not match any user/i;

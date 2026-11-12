@@ -24,7 +24,9 @@ running, and pushing it to GitHub step by step.
 | AI agent testing | `tests/examples/ai-agent.spec.ts` | Checking key facts instead of exact wording, slow answers, "not found" instead of made-up answers |
 | Page Object Model | `pages/` | Locators and actions in one place per page |
 | API client | `api/BookingClient.ts` | The API version of a page object: endpoints and token logic in one place |
-| Fixtures | `fixtures/` | Tests ask for `loggedInInventory` and get a logged-in page |
+| Fixtures | `fixtures/` | Tests ask for `loggedInInventory` or `createBooking`; bookings are deleted again after each test |
+| Log in once | `tests/setup/auth.setup.ts` | Logs in once per browser and saves the session (`storageState`), so UI tests start logged in |
+| Test data | `test-data/` | Builders for default data (`buildBooking({ depositpaid: false })`) and scenario lists for data-driven tests: cart, checkout form and bookings |
 | Config | `config/env.ts`, `.env.example` | URLs and credentials from environment variables or GitHub Secrets, never hard-coded in tests |
 | Component tests | `component-tests/` | Vitest + Testing Library for small React components |
 | AI evaluation | `ai-eval/` | Safety rules, a scoring rubric and an evaluation set with a release bar ([details](ai-eval/README.md)) |
@@ -65,12 +67,13 @@ npm test                # all Playwright tests
 ├── .github/workflows/playwright.yml   CI/CD pipeline
 ├── api/                               API clients (BookingClient)
 ├── config/env.ts                      URLs and credentials from environment variables
-├── fixtures/                          custom Playwright fixtures
+├── fixtures/                          custom fixtures (pages, logged-in state, bookings with cleanup)
 ├── pages/                             page objects (Login, Inventory, Cart, Checkout)
-├── test-data/                         users and customer details
+├── test-data/                         users, builders and scenario lists
 ├── tests/
-│   ├── ui/                            saucedemo: login, inventory, checkout, security, network mocking
-│   ├── api/                           restful-booker: booking CRUD, security
+│   ├── setup/                         log in once and save the session
+│   ├── ui/                            saucedemo: login, inventory, cart, checkout, security, network mocking
+│   ├── api/                           restful-booker: booking CRUD, booking scenarios, security
 │   └── examples/                      techniques on a fake page (AI agent answers)
 ├── component-tests/                   Vitest + React Testing Library
 ├── ai-eval/                           AI evaluation example (Vitest)
@@ -89,5 +92,6 @@ and published to GitHub Pages from `main`.
 
 ## Test data
 
+To add a scenario, add one entry to `test-data/scenarios.ts`; the specs create one test per entry.
 All users, customers and members are synthetic. The credentials in `.env.example` are the
 public demo values that saucedemo and restful-booker publish.
