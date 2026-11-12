@@ -1,6 +1,11 @@
-import { test, expect } from '../../fixtures/test-fixtures';
+// =============================================================================
+// Product list and cart tests on saucedemo: sorting, the cart badge, and
+// that the cart keeps what was added. Every test starts logged in.
+// =============================================================================
+import { test, expect } from '@fixtures/test-fixtures';
 
 test.describe('Inventory & cart', () => {
+  // --- Sorting ---
   test('sort by price low to high', async ({ loggedInInventory }) => {
     await loggedInInventory.sortBy('lohi');
     const prices = await loggedInInventory.getPrices();
@@ -19,6 +24,7 @@ test.describe('Inventory & cart', () => {
     expect(names).toEqual([...names].sort().reverse());
   });
 
+  // --- Cart badge ---
   test('adding and removing items updates the cart badge @smoke', async ({ loggedInInventory }) => {
     await loggedInInventory.addToCart('Sauce Labs Backpack');
     await loggedInInventory.addToCart('Sauce Labs Bike Light');
@@ -31,7 +37,7 @@ test.describe('Inventory & cart', () => {
     await expect(loggedInInventory.cartBadge).toBeHidden();
   });
 
-    test('adding and removing random items updates the cart badge @smoke', async ({ loggedInInventory }) => {
+  test('adding and removing random items updates the cart badge @smoke', async ({ loggedInInventory }) => {
     const firstItem = await loggedInInventory.addRandomToCart();
     const secondItem = await loggedInInventory.addRandomToCart();
     await expect(loggedInInventory.cartBadge).toHaveText('2');
@@ -43,6 +49,7 @@ test.describe('Inventory & cart', () => {
     await expect(loggedInInventory.cartBadge).toBeHidden();
   });
 
+  // --- Cart contents ---
   test('cart keeps the items that were added', async ({ loggedInInventory, cartPage }) => {
     await loggedInInventory.addToCart('Sauce Labs Onesie');
     await loggedInInventory.addToCart('Sauce Labs Fleece Jacket');
@@ -52,6 +59,7 @@ test.describe('Inventory & cart', () => {
     await cartPage.expectItems(['Sauce Labs Onesie', 'Sauce Labs Fleece Jacket']);
   });
 
+  // --- Product list ---
   test('every product shows a name, price and add button', async ({ loggedInInventory }) => {
     await expect(loggedInInventory.items).toHaveCount(6);
 
@@ -62,6 +70,7 @@ test.describe('Inventory & cart', () => {
     }
   });
 
+  // --- Everything at once ---
   test('adding every product puts all of them in the cart', async ({ loggedInInventory, cartPage }) => {
     const names = await loggedInInventory.getNames();
     for (const name of names) {

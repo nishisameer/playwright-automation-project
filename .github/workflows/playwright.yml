@@ -1,24 +1,34 @@
 name: Playwright Tests
 
+# =============================================================================
+# CI/CD pipeline
+#   Stage 1   Type check       catch TypeScript errors in seconds
+#   Stage 2a  Vitest           component tests + AI evaluation (no browser)
+#   Stage 2b  Playwright       chromium / firefox / api / examples, in parallel
+#   Stage 3   Merge reports    one HTML report + JUnit summary on the run page
+#   Stage 4   Publish          report website on GitHub Pages (main only)
+# =============================================================================
+
+# --- When the pipeline runs ---
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
- # schedule:
-  #  - cron: '0 13 * * 1-5'   # nightly regression, weekdays 13:00 UTC (~7am Mountain)
-  workflow_dispatch:          # adds a "Run workflow" button in the Actions tab
+  workflow_dispatch: # adds a "Run workflow" button in the Actions tab
     inputs:
       suite:
         description: 'Which tests to run'
         required: true
         default: 'all'
         type: choice
-        options: [all, smoke, ui, api]
+        options: [all, smoke, security, ui, api]
 
+# --- Least privilege: jobs can only read the repo unless they ask for more ---
 permissions:
   contents: read
 
+# --- A new push cancels the older run on the same branch ---
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -66,9 +76,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
-      fail-fast: false
+      fail-fast: false # let every project finish, even if one fails
       matrix:
-        project: [chromium, firefox, api]
+        include:
+          - { project: chromium, browser: chromium }
+          - { project: firefox, browser: firefox }
+          - { project: api, browser: '' } # API tests need no browser
+          - { project: examples, browser: chromium }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -78,16 +92,23 @@ jobs:
       - run: npm ci
 
       - name: Install browser
-        if: matrix.project != 'api'
-        run: npx playwright install --with-deps ${{ matrix.project }}
+        if: matrix.browser != ''
+        run: npx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Run tests
         env:
           CI: true
+          # Optional: set these in Settings > Secrets. If they're missing, config/env.ts uses the demo values.
+          SAUCE_PASSWORD: ${{ secrets.SAUCE_PASSWORD }}
+          API_USERNAME: ${{ secrets.API_USERNAME }}
+          API_PASSWORD: ${{ secrets.API_PASSWORD }}
           SUITE: ${{ github.event.inputs.suite || 'all' }}
+        # Pick the tests for the chosen suite, and skip projects that aren't part of it.
         run: |
           GREP=""
           if [ "$SUITE" = "smoke" ]; then GREP="--grep @smoke"; fi
+          if [ "$SUITE" = "security" ]; then GREP="--grep @security"; fi
+          if [ "${{ matrix.project }}" = "examples" ] && [ -n "$GREP" ]; then echo "Examples have no tagged tests"; exit 0; fi
           if [ "$SUITE" = "ui" ]  && [ "${{ matrix.project }}" = "api" ]; then echo "Skipping API for ui suite"; exit 0; fi
           if [ "$SUITE" = "api" ] && [ "${{ matrix.project }}" != "api" ]; then echo "Skipping UI for api suite"; exit 0; fi
           npx playwright test --project=${{ matrix.project }} $GREP --reporter=blob,list
