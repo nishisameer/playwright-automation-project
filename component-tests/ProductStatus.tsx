@@ -14,7 +14,11 @@ type ProductStatusProps = {
 export function ProductStatus({ state, count = 0, onRetry }: ProductStatusProps) {
   switch (state) {
     case 'loading':
-      return <p role="status" aria-busy="true">Loading products...</p>;
+      return (
+        <p role="status" aria-busy="true">
+          Loading products...
+        </p>
+      );
 
     case 'error':
       return (
@@ -30,6 +34,10 @@ export function ProductStatus({ state, count = 0, onRetry }: ProductStatusProps)
       return <p role="status">No products found</p>;
 
     case 'ready':
-      return <p role="status">{count} {count === 1 ? 'product' : 'products'}</p>;
+      return (
+        <p role="status">
+          {count} {count === 1 ? 'product' : 'products'}
+        </p>
+      );
   }
 }

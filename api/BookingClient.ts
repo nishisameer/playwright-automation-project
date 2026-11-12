@@ -73,7 +73,11 @@ export class BookingClient {
     return this.request.put(`/booking/${id}`, { data: booking, headers });
   }
 
-  async patch(id: number, changes: Partial<Booking>, headers: Record<string, string> = {}): Promise<APIResponse> {
+  async patch(
+    id: number,
+    changes: Partial<Booking>,
+    headers: Record<string, string> = {},
+  ): Promise<APIResponse> {
     return this.request.patch(`/booking/${id}`, { data: changes, headers });
   }
 

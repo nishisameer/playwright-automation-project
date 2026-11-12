@@ -17,7 +17,12 @@ const badLoginError = /do not match any user/i;
 // --- Access control: who can open which page ---
 test.describe('Security: access control @security', () => {
   // Pages that should never open without logging in first.
-  const protectedPages = ['/inventory.html', '/cart.html', '/checkout-step-one.html', '/checkout-complete.html'];
+  const protectedPages = [
+    '/inventory.html',
+    '/cart.html',
+    '/checkout-step-one.html',
+    '/checkout-complete.html',
+  ];
 
   for (const path of protectedPages) {
     test(`${path} is blocked when not logged in`, async ({ page, loginPage }) => {
@@ -36,7 +41,12 @@ test.describe('Security: access control @security', () => {
     await loginPage.expectError(notLoggedInError);
   });
 
-  test('deleting the session cookie logs the user out', async ({ page, context, loggedInInventory, loginPage }) => {
+  test('deleting the session cookie logs the user out', async ({
+    page,
+    context,
+    loggedInInventory,
+    loginPage,
+  }) => {
     await expect(loggedInInventory.items).toHaveCount(6);
 
     await context.clearCookies();
@@ -55,19 +65,19 @@ test.describe('Security: login page @security', () => {
     await expect(loginPage.passwordInput).toHaveAttribute('type', 'password');
   });
 
-  test('wrong username and wrong password show the same error (no user enumeration)', async ({ loginPage }) => {
-    // Real user, wrong password
+  test('wrong username and wrong password show the same error (no user enumeration)', async ({
+    loginPage,
+  }) => {
+    // Real user, wrong password: remember the exact message
     await loginPage.login(users.standard.username, 'wrong_password');
-    const wrongPassword = await loginPage.errorMessage.innerText();
+    await loginPage.expectError(badLoginError);
+    const wrongPasswordMessage = await loginPage.errorMessage.innerText();
 
-    // Fake user, real password
+    // Fake user, real password: must show the same message, word for word.
+    // If these differed, an attacker could find out which usernames exist.
     await loginPage.goto();
     await loginPage.login('no_such_user', PASSWORD);
-    const wrongUser = await loginPage.errorMessage.innerText();
-
-    // If these differed, an attacker could find out which usernames exist.
-    expect(wrongPassword).toMatch(badLoginError);
-    expect(wrongUser).toBe(wrongPassword);
+    await expect(loginPage.errorMessage).toHaveText(wrongPasswordMessage);
   });
 
   test('password never appears in the URL after logging in', async ({ page, loginPage, inventoryPage }) => {
@@ -94,10 +104,7 @@ test.describe('Security: login page @security', () => {
       await dialog.dismiss();
     });
 
-    const payloads = [
-      '<script>alert("xss")</script>',
-      '<img src=x onerror="window.__xss=true">',
-    ];
+    const payloads = ['<script>alert("xss")</script>', '<img src=x onerror="window.__xss=true">'];
 
     for (const payload of payloads) {
       await loginPage.login(payload, payload);

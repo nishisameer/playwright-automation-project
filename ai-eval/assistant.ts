@@ -13,13 +13,26 @@ import { findMember } from './data';
 export type ModelVersion = 'v1' | 'v2';
 export type Assistant = (question: string) => string;
 
-const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+const MONTHS = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 function formatDate(iso: string, style: number): string {
   const [y, m, d] = iso.split('-').map(Number);
-  if (style === 0) return `${MONTHS[m - 1]} ${d}`;            // March 3
+  if (style === 0) return `${MONTHS[m - 1]} ${d}`; // March 3
   if (style === 1) return `${MONTHS[m - 1].slice(0, 3)} ${d}, ${y}`; // Mar 3, 2026
-  return `${m}/${d}/${y}`;                                   // 3/3/2026
+  return `${m}/${d}/${y}`; // 3/3/2026
 }
 
 export function createAssistant(version: ModelVersion = 'v1'): Assistant {

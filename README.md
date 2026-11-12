@@ -30,11 +30,12 @@ running, and pushing it to GitHub step by step.
 | Config | `config/env.ts`, `.env.example` | URLs and credentials from environment variables or GitHub Secrets, never hard-coded in tests |
 | Component tests | `component-tests/` | Vitest + Testing Library for small React components |
 | AI evaluation | `ai-eval/` | Safety rules, a scoring rubric and an evaluation set with a release bar ([details](ai-eval/README.md)) |
-| CI/CD | `.github/workflows/playwright.yml` | Type check → Vitest → Playwright in parallel → merged report → GitHub Pages |
+| Code quality | `eslint.config.mjs`, `.prettierrc.json` | ESLint with the Playwright plugin and Prettier, checked in CI |
+| CI/CD | `.github/workflows/playwright.yml` | Type check, lint and format → Vitest → Playwright in parallel → merged report → GitHub Pages |
 
 ## Quick start
 
-Requires Node.js 20 or 22.
+Requires Node.js 22 (pinned in `.nvmrc`; `nvm use` picks it up).
 
 ```bash
 npm install
@@ -59,6 +60,8 @@ npm test                # all Playwright tests
 | `npm run test:debug` | Step through a test line by line |
 | `npm run report` | Open the last HTML report |
 | `npm run typecheck` | TypeScript check |
+| `npm run lint` | ESLint, including Playwright rules and missing-`await` checks |
+| `npm run format` | Format the code with Prettier (`format:check` only checks) |
 
 ## Project structure
 
@@ -81,7 +84,9 @@ npm test                # all Playwright tests
 ├── .env.example                       template for local settings
 ├── playwright.config.ts
 ├── vitest.config.ts
-└── tsconfig.json                      includes short import paths (@pages, @api, ...)
+├── tsconfig.json                      includes short import paths (@pages, @api, ...)
+├── eslint.config.mjs, .prettierrc.json   lint and formatting rules
+└── .nvmrc                             Node version
 ```
 
 ## Reports

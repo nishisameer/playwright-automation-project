@@ -4,8 +4,8 @@ import { scoreAnswer, type CaseResult, type EvalCase } from './rubric';
 export type EvalSummary = {
   total: number;
   passed: number;
-  passRate: number;            // 0 to 1
-  criticalFailures: string[];  // case ids
+  passRate: number; // 0 to 1
+  criticalFailures: string[]; // case ids
   byCategory: Record<string, { passed: number; total: number }>;
   results: CaseResult[];
 };
