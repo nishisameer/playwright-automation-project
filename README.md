@@ -12,6 +12,7 @@ CI/CD pipeline on GitHub Actions.
 | Page Object Model (`pages/`) | Locators and actions live in one place per page; tests stay readable |
 | Component tests (`src/components`) | Vitest + Testing Library tests for two small React components: a cart badge and a loading / error / empty status message |
 | AI agent testing (`tests/ui/ai-agent.spec.ts`) | Testing an AI chat answer without exact text: key facts for any wording, slow answers, "not found" instead of made-up answers, failures, synthetic member IDs |
+| Security tests (`tests/ui/security.spec.ts`, `tests/api/security.spec.ts`) | Pages blocked without login and after logout, same error for wrong user or password, SQL injection and XSS in the login form, API changes rejected without a valid token. Run with `npm run test:security` |
 | Network mocking (`tests/ui/network-mocking.spec.ts`) | `page.route()` fakes slow, failed and empty API responses, and blocks images |
 | Fixtures (`fixtures/`) | Tests ask for `loggedInInventory` and get a logged-in page automatically |
 | Test data (`test-data/`) | Users and customer data kept out of the tests |

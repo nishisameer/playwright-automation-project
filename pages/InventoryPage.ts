@@ -66,4 +66,11 @@ export class InventoryPage {
   async openCart() {
     await this.cartLink.click();
   }
+
+  /** Opens the side menu and logs out. */
+  async logout() {
+    await this.page.getByRole('button', { name: 'Open Menu' }).click();
+    // The side menu is hidden from the accessibility tree, so find the link by its id.
+    await this.page.locator('#logout_sidebar_link').click();
+  }
 }
