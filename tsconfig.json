@@ -8,18 +8,20 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "types": [
-      "node"
-    ],
-    "jsx": "react-jsx"
+    "types": ["node"],
+    "jsx": "react-jsx",
+
+    // Short import paths: '@pages/LoginPage' instead of '../../pages/LoginPage'.
+    // Playwright reads these automatically.
+    "baseUrl": ".",
+    "paths": {
+      "@api/*": ["api/*"],
+      "@config/*": ["config/*"],
+      "@fixtures/*": ["fixtures/*"],
+      "@pages/*": ["pages/*"],
+      "@test-data/*": ["test-data/*"]
+    }
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "playwright-report",
-    "test-results"
-  ]
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "playwright-report", "test-results"]
 }

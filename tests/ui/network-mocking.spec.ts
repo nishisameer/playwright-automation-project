@@ -1,6 +1,10 @@
-import { test, expect } from '../../fixtures/test-fixtures';
+import { test, expect } from '@fixtures/test-fixtures';
 import type { Page } from '@playwright/test';
-import { users } from '../../test-data/users';
+import { users } from '@test-data/users';
+
+// =============================================================================
+// Network mocking with page.route().
+// =============================================================================
 
 /**
  * page.route() intercepts requests the BROWSER makes and lets the test decide what happens:
@@ -11,6 +15,9 @@ import { users } from '../../test-data/users';
 
 // ---------- Part 1: the real Sauce Demo site ----------
 test.describe('Network control on Sauce Demo', () => {
+  // Logs in through the form itself, so start logged out.
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test('store still works when product images fail to load', async ({ page, loginPage, inventoryPage }) => {
     // Fail every image request before the page loads
     await page.route('**/*.{png,jpg,jpeg,svg}', (route) => route.abort());

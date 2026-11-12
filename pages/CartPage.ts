@@ -1,3 +1,7 @@
+// =============================================================================
+// Page object for the cart ( /cart.html ): the items in the cart and the
+// button that starts checkout.
+// =============================================================================
 import { type Locator, type Page, expect } from '@playwright/test';
 
 export class CartPage {
@@ -6,6 +10,7 @@ export class CartPage {
   readonly checkoutButton: Locator;
   readonly continueShoppingButton: Locator;
 
+  // --- Locators ---
   constructor(page: Page) {
     this.page = page;
     this.cartItems = page.locator('.cart_item');
@@ -13,6 +18,7 @@ export class CartPage {
     this.continueShoppingButton = page.getByTestId('continue-shopping');
   }
 
+  // --- Checks ---
   async expectLoaded() {
     await expect(this.page).toHaveURL(/cart\.html/);
   }
@@ -24,6 +30,7 @@ export class CartPage {
     }
   }
 
+  // --- Actions ---
   async checkout() {
     await this.checkoutButton.click();
   }
