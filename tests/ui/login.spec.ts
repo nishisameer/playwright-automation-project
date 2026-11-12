@@ -5,6 +5,9 @@
 import { test, expect } from '@fixtures/test-fixtures';
 import { users, PASSWORD } from '@test-data/users';
 
+// --- These tests need a logged-OUT browser, so ignore the saved session ---
+test.use({ storageState: { cookies: [], origins: [] } });
+
 test.describe('Login', () => {
   // --- Every test starts on the login page ---
   test.beforeEach(async ({ loginPage }) => {
